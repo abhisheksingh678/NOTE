@@ -1,7 +1,7 @@
-import axios from "axios"
+import axios from "axios";
 
-const BACKEND_URL=axios.create({
-    baseURL:"http://localhost:4001/api/v1/noteapp"
-})
+const BACKEND_URL = axios.create({
+  baseURL: import.meta.env.VITE_API_URL + "/api/v1/noteapp"
+});
 
-export default BACKEND_URL
+export default BACKEND_URL;

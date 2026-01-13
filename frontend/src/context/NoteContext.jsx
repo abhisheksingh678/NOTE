@@ -1,44 +1,58 @@
-import { useState } from "react";
-import { createContext } from "react";
-import BACKEND_URL from "../api/url";
-import { useEffect } from "react";
+import { createContext, useState, useEffect } from "react";
+import BACKEND_URL from "../utils/backend"; // your Axios file
 
-export const NoteContext=createContext();
+export const NoteContext = createContext();
 
-export const NoteProvider=({children})=>{
-    const [notes,setNotes]=useState([])
-const [loading,setLoading]=useState(true);
-const getNotes=async()=>{
-    setLoading(true);
+export const NoteProvider = ({ children }) => {
+  const [notes, setNotes] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const getNotes = async () => {
     try {
-        const response=await BACKEND_URL.get("/get-notes");
-        setNotes(response.data)
+      const { data } = await BACKEND_URL.get("/");
+      setNotes(data);
+      setLoading(false);
     } catch (error) {
-        console.log("Error fetching notes",error)
-    }finally{
-        setLoading(false);
+      console.log(error);
     }
-}
-useEffect(()=>{
+  };
+
+  const createNote = async (note) => {
+    try {
+      const { data } = await BACKEND_URL.post("/", note);
+      setNotes([...notes, data]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const updateNote = async (id, note) => {
+    try {
+      const { data } = await BACKEND_URL.put(`/${id}`, note);
+      setNotes(notes.map((n) => (n._id === id ? data : n)));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const deleteNote = async (id) => {
+    try {
+      await BACKEND_URL.delete(`/${id}`);
+      setNotes(notes.filter((n) => n._id !== id));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
     getNotes();
-},[])
-const createNote=async (note)=>{
-    const res=await BACKEND_URL.post("/create-note",note)
-    setNotes([res.data,...notes])
+  }, []);
 
-}
-const updateNote=async (id,updateNote)=>{
-     const res=await BACKEND_URL.put(`/update-note/${id}`,updateNote)
-     setNotes(notes.map((note)=>(note._id==id?res.data:note)));
-}
-const deleteNote=async (id)=>{
-     const res=await BACKEND_URL.delete(`/delete-note/${id}`)
-     setNotes(notes.filter((note)=>(note._id!==id)))
-}
-
-return (
-    <NoteContext.Provider value={{notes,loading,createNote,updateNote,deleteNote}}>{children}</NoteContext.Provider>
-)
-}
-
-
+  return (
+    <NoteContext.Provider
+      value={{ notes, loading, createNote, updateNote, deleteNote }}
+    >
+      {children}
+    </NoteContext.Provider>
+  );
+};
