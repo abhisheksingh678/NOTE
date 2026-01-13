@@ -16,9 +16,17 @@ try {
   console.log("Error connecting to mongodb");
 }
 
+// app.use(cors({
+//   origin: "*"
+// }));
+
 //Routing middleware
 app.use(express.json());
-app.use(cors()); //Frontend se jo bhi request aayega usko accept kregaa
+app.use(
+  cors({
+    origin: "*",
+  })
+); //Frontend se jo bhi request aayega usko accept kregaa
 app.use("/api/v1/noteapp", noteRoutes);
 
 app.listen(port, () => {
